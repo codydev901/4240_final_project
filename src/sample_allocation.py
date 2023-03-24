@@ -36,6 +36,9 @@ CHEM_ATTR_KEYS = ['fixed acidity', 'volatile acidity', 'citric acid', 'residual 
 
 @dataclass
 class WineModelPerformance:
+    """
+    TODO: Subclass this?
+    """
     wine_type: str
     features: List[str]
     label: str
@@ -43,6 +46,10 @@ class WineModelPerformance:
     train_abs_errors: List[float]
     validation_abs_errors: List[float]
     test_abs_errors: List[float]
+
+    train_correct_quality_raw: List[bool]
+    validation_correct_quality_raw: List[bool]
+    test_correct_quality_raw: List[bool]
 
     def show_info(self):
         print("WineModelPerformance Info")
@@ -53,6 +60,12 @@ class WineModelPerformance:
         print(f"Train      Error: {np.mean(self.train_abs_errors)}/{np.median(self.train_abs_errors)}/{np.max(self.train_abs_errors)}")
         print(f"Validation Error: {np.mean(self.validation_abs_errors)}/{np.median(self.validation_abs_errors)}/{np.max(self.validation_abs_errors)}")
         print(f"Test       Error: {np.mean(self.test_abs_errors)}/{np.median(self.test_abs_errors)}/{np.max(self.test_abs_errors)}")
+        print(f"Train      Correct: {self.train_correct_quality_raw.count(True)}/{len(self.train_correct_quality_raw)}")
+        print(f"Validation Correct: {self.validation_correct_quality_raw.count(True)}/{len(self.validation_correct_quality_raw)}")
+        print(f"Test       Correct: {self.test_correct_quality_raw.count(True)}/{len(self.test_correct_quality_raw)}")
+
+    def get_friendly_name(self):
+        return self.tag.split(".", 1)[0]
 
 
 @dataclass
@@ -77,13 +90,35 @@ class WineData:
     def get_prediction_abs_error(self, train_pred: List[List[float]], validate_pred: List[List[float]],
                                  test_pred: List[List[float]], tag: str):
 
-        train_diff = [abs(v1[0] - v2[0]) for v1, v2 in zip(self.y_train, train_pred)]
-        validate_diff = [abs(v1[0] - v2[0]) for v1, v2 in zip(self.y_validate, validate_pred)]
-        test_diff = [abs(v1[0] - v2[0]) for v1, v2 in zip(self.y_test, test_pred)]
+        train_diff = []
+        train_correct = []
+        for g_t, pred in zip(self.y_train, train_pred):
+            abs_dff = abs(g_t[0] - pred[0])
+            pred_round = round(pred[0])
+            train_correct.append(int(g_t[0]) == pred_round)
+            train_diff.append(abs_dff)
+
+        validation_diff = []
+        validation_correct = []
+        for g_t, pred in zip(self.y_validate, validate_pred):
+            abs_dff = abs(g_t[0] - pred[0])
+            pred_round = round(pred[0])
+            validation_correct.append(int(g_t[0]) == pred_round)
+            validation_diff.append(abs_dff)
+
+        test_diff = []
+        test_correct = []
+        for g_t, pred in zip(self.y_test, test_pred):
+            abs_dff = abs(g_t[0] - pred[0])
+            pred_round = round(pred[0])
+            test_correct.append(int(g_t[0]) == pred_round)
+            test_diff.append(abs_dff)
 
         return WineModelPerformance(wine_type=self.wine_type, features=self.features, label=self.label,
-                                    tag=tag, train_abs_errors=train_diff, validation_abs_errors=validate_diff,
-                                    test_abs_errors=test_diff)
+                                    tag=tag, train_abs_errors=train_diff, validation_abs_errors=validation_diff,
+                                    test_abs_errors=test_diff, train_correct_quality_raw=train_correct,
+                                    validation_correct_quality_raw=validation_correct,
+                                    test_correct_quality_raw=test_correct)
 
 
 def get_wine_data(wine_type: str,
