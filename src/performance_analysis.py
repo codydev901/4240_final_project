@@ -60,7 +60,7 @@ def write_model_performance(wine_data: WineData, ann_performance: WineModelPerfo
 
 def compare_model_performance(wine_data: WineData):
 
-    # Load Models
+    # Load Models (This part will be made function args)
     ann_model_fn = "white_ann_test.h5" if wine_data.wine_type == "white" else "red_ann_test.h5"
     xgboost_model_fn = "white_xgboost_test.json" if wine_data.wine_type == "white" else "red_xgboost_test.json"
 

@@ -1,0 +1,13 @@
+wine_type,allocation,model_type,metric_key,metric_value
+Red,train,shallow_mlp,mean_abs_error,0.46332716147104896
+Red,train,shallow_mlp,percent_correct,0.628125
+Red,train,xgboost,mean_abs_error,0.013379072894652637
+Red,train,xgboost,percent_correct,1.0
+Red,validation,shallow_mlp,mean_abs_error,0.5203606963157654
+Red,validation,shallow_mlp,percent_correct,0.5625
+Red,validation,xgboost,mean_abs_error,0.44042841643095015
+Red,validation,xgboost,percent_correct,0.634375
+Red,test,shallow_mlp,mean_abs_error,0.4906669395470694
+Red,test,shallow_mlp,percent_correct,0.6332288401253918
+Red,test,xgboost,mean_abs_error,0.44149493573227644
+Red,test,xgboost,percent_correct,0.64576802507837
