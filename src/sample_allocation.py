@@ -35,6 +35,27 @@ CHEM_ATTR_KEYS = ['fixed acidity', 'volatile acidity', 'citric acid', 'residual 
 
 
 @dataclass
+class WineModelPerformance:
+    wine_type: str
+    features: List[str]
+    label: str
+    tag: str
+    train_abs_errors: List[float]
+    validation_abs_errors: List[float]
+    test_abs_errors: List[float]
+
+    def show_info(self):
+        print("WineModelPerformance Info")
+        print(self.wine_type)
+        print(self.features)
+        print(self.label)
+        print(self.tag)
+        print(f"Train      Error: {np.mean(self.train_abs_errors)}/{np.median(self.train_abs_errors)}/{np.max(self.train_abs_errors)}")
+        print(f"Validation Error: {np.mean(self.validation_abs_errors)}/{np.median(self.validation_abs_errors)}/{np.max(self.validation_abs_errors)}")
+        print(f"Test       Error: {np.mean(self.test_abs_errors)}/{np.median(self.test_abs_errors)}/{np.max(self.test_abs_errors)}")
+
+
+@dataclass
 class WineData:
     wine_type: str
     features: List[str]
@@ -52,6 +73,17 @@ class WineData:
     validate_sample_ids: List[int]
     test_samples_ids: List[int]
     normalized: bool
+
+    def get_prediction_abs_error(self, train_pred: List[List[float]], validate_pred: List[List[float]],
+                                 test_pred: List[List[float]], tag: str):
+
+        train_diff = [abs(v1[0] - v2[0]) for v1, v2 in zip(self.y_train, train_pred)]
+        validate_diff = [abs(v1[0] - v2[0]) for v1, v2 in zip(self.y_validate, validate_pred)]
+        test_diff = [abs(v1[0] - v2[0]) for v1, v2 in zip(self.y_test, test_pred)]
+
+        return WineModelPerformance(wine_type=self.wine_type, features=self.features, label=self.label,
+                                    tag=tag, train_abs_errors=train_diff, validation_abs_errors=validate_diff,
+                                    test_abs_errors=test_diff)
 
 
 def get_wine_data(wine_type: str,
@@ -118,7 +150,7 @@ def get_wine_data(wine_type: str,
 
 
 def main():
-    
+
     print("Wine Data Test")
 
     wine_data = get_wine_data(wine_type="red", features=CHEM_ATTR_KEYS, label=QualityLabels.RAW.value,
