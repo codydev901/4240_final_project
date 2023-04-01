@@ -1,0 +1,1 @@
+xg_id,wine_type,normalized,learning_rate,max_depth,n_esitmators,gamma,subsample,min_child_weight,train_mae,validation_mae,test_mae,train_pc,validation_pc,test_pc

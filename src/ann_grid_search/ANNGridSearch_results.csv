@@ -1,1 +1,1 @@
-ann_id,wine_type,normalized,train_mae,validation_mae,test_mae,train_pc,validation_pc,test_pc
+ann_id,wine_type,normalized,optimizer,hidden_layer_1_nodes,hidden_layer_1_activation,hidden_layer_2_nodes,hidden_layer_2_activation,train_mae,validation_mae,test_mae,train_pc,validation_pc,test_pc

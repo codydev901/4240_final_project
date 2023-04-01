@@ -53,6 +53,15 @@ class ANNInfo:
 
         return ANNInfo(ann_id=ann_id, layers=hidden_layers, optimizer=optimizer)
 
+    def get_grid_info(self):
+
+        if len(self.layers) == 2:
+            layer_two = [self.layers[1].nodes, self.layers[1].activation]
+        else:
+            layer_two = [0, "NA"]
+
+        return [self.optimizer, self.layers[0].nodes, self.layers[0].activation] + layer_two
+
 
 def train_test_ann(wine_data: WineData, ann_info: ANNInfo, for_grid_search: bool = False):
     """
@@ -115,7 +124,7 @@ def train_test_ann(wine_data: WineData, ann_info: ANNInfo, for_grid_search: bool
 
         with open("ann_grid_search/ANNGridSearch_results.csv", "a") as a_file:
             writer = csv.writer(a_file, delimiter=",")
-            writer.writerow([ann_info.ann_id, wine_data.wine_type, wine_data.normalized] + ann_performance.get_mae_pc())
+            writer.writerow([ann_info.ann_id, wine_data.wine_type, wine_data.normalized] + ann_info.get_grid_info() + ann_performance.get_mae_pc())
 
 
 def main():
