@@ -129,27 +129,17 @@ def get_wine_data(wine_type: str,
                   test_split_groups: List[int],
                   normalize: bool = False) -> WineData:
     """
-    TODO: This is kinda slow, maybe rework or change initial parse format (add additional one)
-    TODO: Potentially perform 60/20/20 split first grouped by quality
-    TODO: inline comments
-    TODO: Normalization
+    Dynamic X/Y loading for use in the modeling steps. Performs 60/20/20 split within each quality class to account
+    for class imbalance. Group assignment controlled by args for cross-validation. Min/max normalization if desired.
+
+    Works off of parsed_data/wine_combined_parsed_flat.csv
     """
 
-    df = pd.read_csv("parsed_data/wine_combined_parsed.csv")
+    # Load and Filter
+    df = pd.read_csv("parsed_data/wine_combined_parsed_flat.csv")
     df = df[df["wine_type"] == wine_type]
 
-    all_sample_indices = list(df["sample_index"].unique())
-    np.random.seed(1337)
-    np.random.shuffle(all_sample_indices)
-
-    allocation_groups = np.array_split(all_sample_indices, 5)
-
-    train_indices = list(itertools.chain(*[list(v) for i, v in enumerate(allocation_groups)
-                                           if i in train_split_groups]))
-    validation_indices = list(itertools.chain(*[v for i, v in enumerate(allocation_groups)
-                                                if i in validation_split_groups]))
-    test_indices = list(itertools.chain(*[v for i, v in enumerate(allocation_groups) if i in test_split_groups]))
-
+    # For feature/label data after assignment below
     x_train = []
     x_validate = []
     x_test = []
@@ -157,31 +147,97 @@ def get_wine_data(wine_type: str,
     y_validate = []
     y_test = []
 
-    for sample_index in all_sample_indices:
-        sample_df = df[df["sample_index"] == sample_index]
-        sample_features = []
-        sample_labels = []
-        for attr_key in features:
-            sample_features.append(list(sample_df[sample_df["attr_key"] == attr_key]["attr_value"])[0])
-        sample_labels.append(list(sample_df[label].unique())[0])
-        if sample_index in validation_indices:
-            x_validate.append(sample_features)
-            y_validate.append(sample_labels)
-        elif sample_index in test_indices:
-            x_test.append(sample_features)
-            y_test.append(sample_labels)
-        else:
-            x_train.append(sample_features)
-            y_train.append(sample_labels)
+    # For overall sample index allocation
+    overall_train_indices = []
+    overall_validation_indices = []
+    overall_test_indices = []
+
+    # To apply a 60/20/20 split within quality classes
+    raw_qualities = list(df["quality_raw"].unique())
+    raw_qualities.sort()
+
+    # For reproducibility
+    np.random.seed(1337)
+
+    # For use in Min/Max Normalization if Applicable
+    feature_min = [df[f].min() for f in features]
+    feature_max = [df[f].max() for f in features]
+
+    for raw_quality in raw_qualities:
+
+        # Subset DF on Quality
+        sub_df = df[df["quality_raw"] == raw_quality]
+        # Get list of sample_indices & Shuffle
+        sub_sample_indices = list(sub_df["sample_index"].unique())
+        np.random.shuffle(sub_sample_indices)
+
+        # Split into 5 groups, assign to train/validation/test per function arguments
+        allocation_groups = np.array_split(sub_sample_indices, 5)
+
+        train_indices = list(itertools.chain(*[list(v) for i, v in enumerate(allocation_groups)
+                                               if i in train_split_groups]))
+        validation_indices = list(itertools.chain(*[v for i, v in enumerate(allocation_groups)
+                                                    if i in validation_split_groups]))
+        test_indices = list(itertools.chain(*[v for i, v in enumerate(allocation_groups) if i in test_split_groups]))
+
+        # Iterate and Populate X/Y in context of above allocation.
+        for i, row in sub_df.iterrows():
+
+            sample_index = row["sample_index"]
+            sample_features = [row[f] for f in features]  # Option to sub-select features from arg.
+
+            # Normalize by min/max per arg
+            if normalize:
+                norm_sample_features = []
+                for n_i, s_f in enumerate(sample_features):
+                    f_max = feature_max[n_i]
+                    f_min = feature_min[n_i]
+                    f_norm = (s_f - f_min) / (f_max - f_min)
+                    norm_sample_features.append(f_norm)
+                sample_features = norm_sample_features
+
+            sample_labels = [row[label]]
+
+            # Add to X/Y
+            if sample_index in validation_indices:
+                x_validate.append(sample_features)
+                y_validate.append(sample_labels)
+            elif sample_index in test_indices:
+                x_test.append(sample_features)
+                y_test.append(sample_labels)
+            else:
+                x_train.append(sample_features)
+                y_train.append(sample_labels)
+
+        # Keep overall track of which samples went where
+        overall_train_indices += train_indices
+        overall_validation_indices += validation_indices
+        overall_test_indices += test_indices
 
     wine_data = WineData(wine_type=wine_type, features=features, label=label, x_train=x_train, x_validate=x_validate,
                          x_test=x_test, y_train=y_train, y_validate=y_validate, y_test=y_test,
                          train_groups=train_split_groups, validate_groups=validation_split_groups,
-                         test_groups=test_split_groups, train_sample_ids=train_indices,
-                         validate_sample_ids=validation_indices, test_samples_ids=test_indices,
+                         test_groups=test_split_groups, train_sample_ids=overall_train_indices,
+                         validate_sample_ids=overall_validation_indices, test_samples_ids=overall_test_indices,
                          normalized=normalize)
 
     return wine_data
+
+
+def check_sample_class_balance(wine_type: str):
+    """
+    Quick look at sample/quality representation in the data.
+
+    Most samples below to the "medium" group. When doing the train/validation/test split
+    above, want to ensure that the split is performed within the quality group to prevent the less represented
+    quality groups from potentially being over or under represented.
+    """
+
+    df = pd.read_csv("parsed_data/wine_combined_parsed_flat.csv")
+    df = df[df["wine_type"] == wine_type]
+
+    print(df.head())
+    print(df.groupby(["quality_raw"]).count())
 
 
 def main():
@@ -193,6 +249,9 @@ def main():
                               normalize=False)
 
     print(wine_data)
+
+    # check_sample_class_balance(wine_type="white")
+    # check_sample_class_balance(wine_type="red")
 
 
 if __name__ == "__main__":
