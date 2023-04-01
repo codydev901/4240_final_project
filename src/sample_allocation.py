@@ -64,6 +64,13 @@ class WineModelPerformance:
         print(f"Validation Correct: {self.validation_correct_quality_raw.count(True)}/{len(self.validation_correct_quality_raw)}")
         print(f"Test       Correct: {self.test_correct_quality_raw.count(True)}/{len(self.test_correct_quality_raw)}")
 
+    def get_mae_pc(self):
+
+        return [np.mean(self.train_abs_errors), np.mean(self.validation_abs_errors), np.mean(self.test_abs_errors),
+                self.train_correct_quality_raw.count(True)/len(self.train_correct_quality_raw),
+                self.validation_correct_quality_raw.count(True)/len(self.validation_correct_quality_raw),
+                self.test_correct_quality_raw.count(True)/len(self.test_correct_quality_raw)]
+
     def get_friendly_name(self):
         return self.tag.split(".", 1)[0]
 
