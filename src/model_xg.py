@@ -1,4 +1,5 @@
 import numpy as np
+import csv
 from xgboost import XGBRegressor
 from sklearn.model_selection import GridSearchCV
 from load_allocate import get_wine_data, WineData, QualityLabels, CHEM_ATTR_KEYS
@@ -15,21 +16,46 @@ Models trained here used in the final comparison.
 """
 
 
-def train_test_xgboost(wine_data: WineData):
+def train_test_xgboost(wine_data: WineData, for_cv: bool = False):
+    """
+    Params set to be result from grid_search: xg_id == 381
+    """
 
-    model = XGBRegressor(seed=1337, n_estimators=100, max_depth=6, learning_rate=0.3, subsample=1.0,
-                         gamma=0.0, min_child_weight=10.0)
+    model = XGBRegressor(seed=1337, learning_rate=0.03, max_depth=12, n_estimators=1000,
+                         gamma=0.0, subsample=0.75, min_child_weight=1.0)
 
     model.fit(wine_data.x_train, wine_data.y_train, eval_metric='mae',
-              eval_set=[(wine_data.x_validate, wine_data.y_validate)], verbose=True,
+              eval_set=[(wine_data.x_validate, wine_data.y_validate)], verbose=False,
               early_stopping_rounds=25)
 
-    validation_pred = list(model.predict(wine_data.x_validate))
-    validation_error = [abs(v1[0] - v2) for v1, v2 in zip(wine_data.y_validate, validation_pred)]
-    #
-    print("xg boost, validation mean error test - for param tuning", np.mean(validation_error))
-    #
-    # model.save_model(fname=f"models/{wine_data.wine_type}_xgboost_test.json")
+    if wine_data.normalized:
+        norm_str = "f_norm"
+    else:
+        norm_str = "f_raw"
+
+    if for_cv:
+
+        save_path = f"cross_validation/models_full/xgboost/{wine_data.wine_type}_{norm_str}_allf_val{wine_data.validate_groups[0]}_test{wine_data.test_groups[0]}.json"
+
+        train_pred_xg = model.predict(wine_data.x_train)
+        train_pred_xg = [[v] for v in list(train_pred_xg)]
+
+        validate_pred_xg = model.predict(wine_data.x_validate)
+        validate_pred_xg = [[v] for v in list(validate_pred_xg)]
+
+        test_pred_xg = model.predict(wine_data.x_test)
+        test_pred_xg = [[v] for v in list(test_pred_xg)]
+
+        xgboost_performance = wine_data.get_prediction_abs_error(train_pred=train_pred_xg,
+                                                                 validate_pred=validate_pred_xg,
+                                                                 test_pred=test_pred_xg, tag=save_path)
+
+        with open("cross_validation/cv_xgboost.csv", "a") as a_file:
+            writer = csv.writer(a_file, delimiter=",")
+            writer.writerow(["xgboost", wine_data.wine_type,
+                             wine_data.normalized, "all", wine_data.validate_groups[0], wine_data.test_groups[0]] + xgboost_performance.get_mae_pc())
+
+        model.save_model(fname=save_path)
 
 
 def main():

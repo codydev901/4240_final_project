@@ -17,19 +17,18 @@ pkz325
 CPSC 4240 Spring 2023
 Final Project
 
-ANN Model stuff. Currently very basic, but will be made dynamic in terms of pseudo-grid search / cross-validation
-type stuff (similar to load_allocate.py stuff).
+Doc Doc Doc
 """
 
 
 @dataclass
-class ANNLayer:
+class ANNLayer:  # Helper for dynamic NN structure
     nodes: int
     activation: str
 
 
 @dataclass
-class ANNInfo:
+class ANNInfo:  # Helper for dynamic NN structure
     ann_id: int
     layers: List[ANNLayer]
     optimizer: str
@@ -62,6 +61,22 @@ class ANNInfo:
             layer_two = [0, "NA"]
 
         return [self.optimizer, self.layers[0].nodes, self.layers[0].activation] + layer_two
+
+
+# Final Configurations From Grid Search
+SHALLOW_ANN_INFO = ANNInfo.from_dict({"ann_id": 4,
+                                      "optimizer": "nadam",
+                                      "hidden_layer_1_nodes": 96,
+                                      "hidden_layer_1_activation": "relu",
+                                      "hidden_layer_2_nodes": "",
+                                      "hidden_layer_2_activation": ""})
+
+DEEP_ANN_INFO = ANNInfo.from_dict({"ann_id": 64,
+                                   "optimizer": "nadam",
+                                   "hidden_layer_1_nodes": 96,
+                                   "hidden_layer_1_activation": "relu",
+                                   "hidden_layer_2_nodes": 48,
+                                   "hidden_layer_2_activation": "relu"})
 
 
 def train_test_ann(wine_data: WineData, ann_info: ANNInfo, for_grid_search: bool = False):

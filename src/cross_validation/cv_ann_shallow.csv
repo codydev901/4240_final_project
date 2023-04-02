@@ -1,0 +1,1 @@
+model_type,wine_type,normalized,features,validate_group,test_group,train_mae,validation_mae,test_mae,train_pc,validation_pc,test_pc

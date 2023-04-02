@@ -31,8 +31,9 @@ def get_best_xg_model_params():
 
     overall_test_mae_score = [[k, np.mean(overall_test_mae_score[k])] for k in overall_test_mae_score]
     overall_test_mae_score.sort(key=lambda x: x[-1])
-    print(overall_test_mae_score[:10])
 
+    print()
+    print(overall_test_mae_score[:10])
     print(f"Best Overall XGBoost Model Param:{overall_test_mae_score[0]}")
     print(xg_grid_df.loc[xg_grid_df["xg_id"] == overall_test_mae_score[0][0]])
 
@@ -63,6 +64,7 @@ def get_best_ann_model_params():
                 except KeyError:
                     res_dict[ann_id] = [test_mae]
 
+    print()
     # Shallow NN Result
     overall_test_mae_score_shallow = [[k, np.mean(overall_test_mae_score_shallow[k])] for k in overall_test_mae_score_shallow]
     overall_test_mae_score_shallow.sort(key=lambda x: x[-1])
@@ -70,6 +72,7 @@ def get_best_ann_model_params():
     print(f"Best Overall Shallow NN Model Param:{overall_test_mae_score_shallow[0]}")
     print(nn_grid_df.loc[nn_grid_df["ann_id"] == overall_test_mae_score_shallow[0][0]])
 
+    print()
     # Deep NN Result
     overall_test_mae_score_deep = [[k, np.mean(overall_test_mae_score_deep[k])] for k in overall_test_mae_score_deep]
     overall_test_mae_score_deep.sort(key=lambda x: x[-1])
