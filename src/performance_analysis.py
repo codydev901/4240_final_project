@@ -2,9 +2,9 @@ import pandas as pd
 from dataclasses import dataclass
 from keras.models import load_model
 from xgboost import XGBRegressor
-from sample_allocation import get_wine_data, WineData, QualityLabels, CHEM_ATTR_KEYS, WineModelPerformance
+from load_allocate import get_wine_data, WineData, QualityLabels, CHEM_ATTR_KEYS, WineModelPerformance
 from typing import List
-from load_and_parse import quality_class_from_quality
+from load_parse import quality_class_from_quality
 
 """
 Cody Whitt
