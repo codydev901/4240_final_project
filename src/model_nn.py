@@ -97,7 +97,7 @@ def train_test_ann(wine_data: WineData, ann_info: ANNInfo, for_grid_search: bool
             norm_str = "f_norm"
         else:
             norm_str = "f_raw"
-        model_file_path = f"ann_grid_search/ags_models/{wine_data.wine_type}_{norm_str}_{ann_info.ann_id}.h5"
+        model_file_path = f"nn_grid_search/ags_models/{wine_data.wine_type}_{norm_str}_{ann_info.ann_id}.h5"
 
     mc_c = ModelCheckpoint(filepath=model_file_path,
                            save_best_only=True,
@@ -126,7 +126,7 @@ def train_test_ann(wine_data: WineData, ann_info: ANNInfo, for_grid_search: bool
         ann_performance = wine_data.get_prediction_abs_error(train_pred=train_pred_ann, validate_pred=validate_pred_ann,
                                                              test_pred=test_pred_ann, tag=model_file_path)
 
-        with open("ann_grid_search/ANNGridSearch_results.csv", "a") as a_file:
+        with open("nn_grid_search/ANNGridSearch_results.csv", "a") as a_file:
             writer = csv.writer(a_file, delimiter=",")
             writer.writerow([ann_info.ann_id, wine_data.wine_type, wine_data.normalized] + ann_info.get_grid_info() + ann_performance.get_mae_pc())
 

@@ -9,8 +9,9 @@ pkz325
 CPSC 4240 Spring 2023
 Final Project
 
-XGBoost Model stuff. Currently very basic, but will be made dynamic in terms of pseudo-grid search / cross-validation
-type stuff (similar to load_allocate.py stuff).
+XGBoost Model stuff. Configuration hard-coded to use the selected parameters chosen by grid search.
+
+Models trained here used in the final comparison.
 """
 
 

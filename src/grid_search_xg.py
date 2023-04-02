@@ -1,7 +1,5 @@
-import numpy as np
 import csv
 from xgboost import XGBRegressor
-from sklearn.model_selection import GridSearchCV
 from load_allocate import get_wine_data, WineData, QualityLabels, CHEM_ATTR_KEYS
 
 """
@@ -10,8 +8,14 @@ pkz325
 CPSC 4240 Spring 2023
 Final Project
 
-XGBoost Model stuff. Currently very basic, but will be made dynamic in terms of pseudo-grid search / cross-validation
-type stuff (similar to load_allocate.py stuff).
+Performs a grid search using the hyper-parameters defined below in context of both the red and white wine data, with 
+features both normalized and raw. Results in 3^6 (729) XGBoost models being trained per (wine_type, normalized) pair,
+so 2916 in total.
+
+The model configuration with the lowest average mean absolute error on the withheld test portion of the data across
+the four (wine_type, normalized) inputs will be selected to represent XGBoost in terms of comparison with the NN.
+
+TODO: Inline Comments
 """
 
 LEARNING_RATE = [0.3, 0.03, 0.01]
@@ -78,22 +82,26 @@ def perform_xg_boost_grid_search_on_wine_data(wine_data: WineData):
 
 def main():
 
-    white_wine_data = get_wine_data(wine_type="white", features=CHEM_ATTR_KEYS, label=QualityLabels.RAW.value,
-                                    train_split_groups=[0, 1, 2], validation_split_groups=[3], test_split_groups=[4],
-                                    normalize=False)
+    pass
 
-    red_wine_data = get_wine_data(wine_type="red", features=CHEM_ATTR_KEYS, label=QualityLabels.RAW.value,
-                                  train_split_groups=[0, 1, 2], validation_split_groups=[3], test_split_groups=[4],
-                                  normalize=False)
+    # Note: Commented out to avoid re-running on accident (takes around 3 hours)
 
-    white_wine_data_norm = get_wine_data(wine_type="white", features=CHEM_ATTR_KEYS, label=QualityLabels.RAW.value,
-                                         train_split_groups=[0, 1, 2], validation_split_groups=[3],
-                                         test_split_groups=[4],
-                                         normalize=True)
-
-    red_wine_data_norm = get_wine_data(wine_type="red", features=CHEM_ATTR_KEYS, label=QualityLabels.RAW.value,
-                                       train_split_groups=[0, 1, 2], validation_split_groups=[3], test_split_groups=[4],
-                                       normalize=True)
+    # white_wine_data = get_wine_data(wine_type="white", features=CHEM_ATTR_KEYS, label=QualityLabels.RAW.value,
+    #                                 train_split_groups=[0, 1, 2], validation_split_groups=[3], test_split_groups=[4],
+    #                                 normalize=False)
+    #
+    # red_wine_data = get_wine_data(wine_type="red", features=CHEM_ATTR_KEYS, label=QualityLabels.RAW.value,
+    #                               train_split_groups=[0, 1, 2], validation_split_groups=[3], test_split_groups=[4],
+    #                               normalize=False)
+    #
+    # white_wine_data_norm = get_wine_data(wine_type="white", features=CHEM_ATTR_KEYS, label=QualityLabels.RAW.value,
+    #                                      train_split_groups=[0, 1, 2], validation_split_groups=[3],
+    #                                      test_split_groups=[4],
+    #                                      normalize=True)
+    #
+    # red_wine_data_norm = get_wine_data(wine_type="red", features=CHEM_ATTR_KEYS, label=QualityLabels.RAW.value,
+    #                                    train_split_groups=[0, 1, 2], validation_split_groups=[3], test_split_groups=[4],
+    #                                    normalize=True)
 
     # perform_xg_boost_grid_search_on_wine_data(white_wine_data)
     # perform_xg_boost_grid_search_on_wine_data(red_wine_data)
