@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Custom
+src/xg_grid_search/xgg_models/*
+
 # C extensions
 *.so
 
