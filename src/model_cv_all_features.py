@@ -3,6 +3,7 @@ from typing import List
 from load_allocate import get_wine_data, QualityLabels, CHEM_ATTR_KEYS
 
 from model_xg import train_test_xgboost
+from model_nn import train_test_ann, SHALLOW_ANN_INFO, DEEP_ANN_INFO
 
 
 def perform_cross_validation_training(train_groups: List[int], validation_groups: List[int],
@@ -30,6 +31,18 @@ def perform_cross_validation_training(train_groups: List[int], validation_groups
     train_test_xgboost(wine_data=red_wine_data, for_cv=True)
     train_test_xgboost(wine_data=white_wine_data_norm, for_cv=True)
     train_test_xgboost(wine_data=red_wine_data_norm, for_cv=True)
+
+    # NN Shallow
+    train_test_ann(wine_data=white_wine_data, ann_info=SHALLOW_ANN_INFO, for_grid_search=False, for_cv=True)
+    train_test_ann(wine_data=red_wine_data, ann_info=SHALLOW_ANN_INFO, for_grid_search=False, for_cv=True)
+    train_test_ann(wine_data=white_wine_data_norm, ann_info=SHALLOW_ANN_INFO, for_grid_search=False, for_cv=True)
+    train_test_ann(wine_data=red_wine_data_norm, ann_info=SHALLOW_ANN_INFO, for_grid_search=False, for_cv=True)
+
+    # NN Deep
+    train_test_ann(wine_data=white_wine_data, ann_info=DEEP_ANN_INFO, for_grid_search=False, for_cv=True)
+    train_test_ann(wine_data=red_wine_data, ann_info=DEEP_ANN_INFO, for_grid_search=False, for_cv=True)
+    train_test_ann(wine_data=white_wine_data_norm, ann_info=DEEP_ANN_INFO, for_grid_search=False, for_cv=True)
+    train_test_ann(wine_data=red_wine_data_norm, ann_info=DEEP_ANN_INFO, for_grid_search=False, for_cv=True)
 
 
 def main():
