@@ -80,7 +80,7 @@ DEEP_ANN_INFO = ANNInfo.from_dict({"ann_id": 64,
 
 
 def train_test_ann(wine_data: WineData, ann_info: ANNInfo, for_grid_search: bool = False,
-                   for_cv: bool = False):
+                   for_cv: bool = False, reduc_f: bool = False):
     """
     Doc Doc Doc
     """
@@ -123,7 +123,11 @@ def train_test_ann(wine_data: WineData, ann_info: ANNInfo, for_grid_search: bool
             deep_shallow = "nn_shallow"
         else:
             deep_shallow = "nn_deep"
-        model_file_path = f"cross_validation/models_full/{deep_shallow}/{wine_data.wine_type}_{norm_str}_allf_val{wine_data.validate_groups[0]}_test{wine_data.test_groups[0]}.h5"
+
+        if reduc_f:
+            model_file_path = f"cross_validation/models_feature_reduc/{deep_shallow}/{wine_data.wine_type}_{norm_str}_reducf_val{wine_data.validate_groups[0]}_test{wine_data.test_groups[0]}.h5"
+        else:
+            model_file_path = f"cross_validation/models_full/{deep_shallow}/{wine_data.wine_type}_{norm_str}_allf_val{wine_data.validate_groups[0]}_test{wine_data.test_groups[0]}.h5"
 
     mc_c = ModelCheckpoint(filepath=model_file_path,
                            save_best_only=True,
@@ -167,16 +171,30 @@ def train_test_ann(wine_data: WineData, ann_info: ANNInfo, for_grid_search: bool
         ann_performance = wine_data.get_prediction_abs_error(train_pred=train_pred_ann, validate_pred=validate_pred_ann,
                                                              test_pred=test_pred_ann, tag=model_file_path)
 
-        if is_shallow:
-            with open("cross_validation/cv_ann_shallow.csv", "a") as a_file:
-                writer = csv.writer(a_file, delimiter=",")
-                writer.writerow(["nn_shallow", wine_data.wine_type, wine_data.normalized, "all",
-                                 wine_data.validate_groups[0], wine_data.test_groups[0]] + ann_performance.get_mae_pc())
+        if reduc_f:
+            if is_shallow:
+                with open("cross_validation/cv_ann_shallow_reduc.csv", "a") as a_file:
+                    writer = csv.writer(a_file, delimiter=",")
+                    writer.writerow(["nn_shallow", wine_data.wine_type, wine_data.normalized, "reduced",
+                                     wine_data.validate_groups[0],
+                                     wine_data.test_groups[0]] + ann_performance.get_mae_pc())
+            else:
+                with open("cross_validation/cv_ann_deep_reduc.csv", "a") as a_file:
+                    writer = csv.writer(a_file, delimiter=",")
+                    writer.writerow(["nn_deep", wine_data.wine_type, wine_data.normalized, "reduced",
+                                     wine_data.validate_groups[0],
+                                     wine_data.test_groups[0]] + ann_performance.get_mae_pc())
         else:
-            with open("cross_validation/cv_ann_deep.csv", "a") as a_file:
-                writer = csv.writer(a_file, delimiter=",")
-                writer.writerow(["nn_deep", wine_data.wine_type, wine_data.normalized, "all",
-                                 wine_data.validate_groups[0], wine_data.test_groups[0]] + ann_performance.get_mae_pc())
+            if is_shallow:
+                with open("cross_validation/cv_ann_shallow.csv", "a") as a_file:
+                    writer = csv.writer(a_file, delimiter=",")
+                    writer.writerow(["nn_shallow", wine_data.wine_type, wine_data.normalized, "all",
+                                     wine_data.validate_groups[0], wine_data.test_groups[0]] + ann_performance.get_mae_pc())
+            else:
+                with open("cross_validation/cv_ann_deep.csv", "a") as a_file:
+                    writer = csv.writer(a_file, delimiter=",")
+                    writer.writerow(["nn_deep", wine_data.wine_type, wine_data.normalized, "all",
+                                     wine_data.validate_groups[0], wine_data.test_groups[0]] + ann_performance.get_mae_pc())
 
 
 def main():

@@ -6,6 +6,7 @@ __pycache__/
 # Custom
 src/xg_grid_search/xgg_models/*
 src/cross_validation/models_full/xgboost/*
+src/cross_validation/models_feature_reduc/xgboost/*
 
 # C extensions
 *.so

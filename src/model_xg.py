@@ -16,7 +16,7 @@ Models trained here used in the final comparison.
 """
 
 
-def train_test_xgboost(wine_data: WineData, for_cv: bool = False):
+def train_test_xgboost(wine_data: WineData, for_cv: bool = False, reduc_f: bool = False):
     """
     Params set to be result from grid_search: xg_id == 381
     """
@@ -35,7 +35,10 @@ def train_test_xgboost(wine_data: WineData, for_cv: bool = False):
 
     if for_cv:
 
-        save_path = f"cross_validation/models_full/xgboost/{wine_data.wine_type}_{norm_str}_allf_val{wine_data.validate_groups[0]}_test{wine_data.test_groups[0]}.json"
+        if reduc_f:
+            save_path = f"cross_validation/models_feature_reduc/xgboost/{wine_data.wine_type}_{norm_str}_reducf_val{wine_data.validate_groups[0]}_test{wine_data.test_groups[0]}.json"
+        else:
+            save_path = f"cross_validation/models_full/xgboost/{wine_data.wine_type}_{norm_str}_allf_val{wine_data.validate_groups[0]}_test{wine_data.test_groups[0]}.json"
 
         train_pred_xg = model.predict(wine_data.x_train)
         train_pred_xg = [[v] for v in list(train_pred_xg)]
@@ -50,10 +53,16 @@ def train_test_xgboost(wine_data: WineData, for_cv: bool = False):
                                                                  validate_pred=validate_pred_xg,
                                                                  test_pred=test_pred_xg, tag=save_path)
 
-        with open("cross_validation/cv_xgboost.csv", "a") as a_file:
-            writer = csv.writer(a_file, delimiter=",")
-            writer.writerow(["xgboost", wine_data.wine_type,
-                             wine_data.normalized, "all", wine_data.validate_groups[0], wine_data.test_groups[0]] + xgboost_performance.get_mae_pc())
+        if reduc_f:
+            with open("cross_validation/cv_xgboost_reduc.csv", "a") as a_file:
+                writer = csv.writer(a_file, delimiter=",")
+                writer.writerow(["xgboost", wine_data.wine_type,
+                                 wine_data.normalized, "reduced", wine_data.validate_groups[0], wine_data.test_groups[0]] + xgboost_performance.get_mae_pc())
+        else:
+            with open("cross_validation/cv_xgboost.csv", "a") as a_file:
+                writer = csv.writer(a_file, delimiter=",")
+                writer.writerow(["xgboost", wine_data.wine_type,
+                                 wine_data.normalized, "all", wine_data.validate_groups[0], wine_data.test_groups[0]] + xgboost_performance.get_mae_pc())
 
         model.save_model(fname=save_path)
 
